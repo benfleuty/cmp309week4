@@ -25,13 +25,6 @@ public class CallReceiver extends BroadcastReceiver {
             actionPhoneStateChanged(context, intent);
         }
     }
-
-    private void actionNewOutgoingCall(Context context, Intent intent) {
-        String oldNumber = intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER);
-        Log.i(TAG, "To: " + oldNumber);
-        this.setResultData("0123456789");
-    }
-
     private void actionPhoneStateChanged(Context context, Intent intent) {
         String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
         final String TAG = "PhoneStateListener";
@@ -74,6 +67,5 @@ public class CallReceiver extends BroadcastReceiver {
         }
 
         lastState = state;
-
     }
 }

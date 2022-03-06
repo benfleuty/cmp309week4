@@ -11,10 +11,6 @@ import android.widget.Toast;
 public class IncomingSmsReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        Toast.makeText(context, "hello", Toast.LENGTH_SHORT).show();
-        // if no sms received, stop
-        if (!intent.getAction().equals("android.provider.Telephony.SMS_RECEIVED")) return;
-
         Bundle bundle = intent.getExtras();
         if(bundle != null)
         {
