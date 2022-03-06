@@ -9,19 +9,33 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.HashMap;
+
 public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE_READ_PHONE_STATE = 1;
     private static final int REQUEST_CODE_READ_CALL_LOG = 2;
-    TelephonyManager telephonyManager;
+    private static final int REQUEST_CODE_RECEIVE_SMS = 3;
+    private static final int REQUEST_CODE_READ_SMS = 4;
+    private static final int REQUEST_CODE_SEND_SMS = 5;
 
     private final BroadcastReceiver MAIN_BROADCAST_RECEIVER = new CallReceiver();
+    private final IncomingSmsReceiver MAIN_SMS_RECEIVER = new IncomingSmsReceiver();
+
+    private final HashMap<String, Boolean> permissionAlreadyRequested = new HashMap<String, Boolean>() {{
+        put("READ_PHONE_STATE", false);
+        put("READ_CALL_LOG", false);
+        put("RECEIVE_SMS", false);
+        put("SEND_SMS", false);
+        put("READ_SMS", false);
+    }};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,17 +61,101 @@ public class MainActivity extends AppCompatActivity {
         filter.addAction("android.intent.action.PHONE_STATE");
         filter.addAction("android.intent.action.NEW_OUTGOING_CALL");
         filter.addAction("android.intent.action.PROCESS_OUTGOING_CALLS");
-        filter.setPriority(0);
+        filter.addAction("android.provider.Telephony.SMS_RECEIVED");
         registerReceiver(MAIN_BROADCAST_RECEIVER, filter);
+
+        filter = new IntentFilter("android.provider.Telephony.SMS_RECEIVED");
+        registerReceiver(MAIN_SMS_RECEIVER, filter);
     }
 
     private void unregisterReceivers() {
         unregisterReceiver(MAIN_BROADCAST_RECEIVER);
+        unregisterReceiver(MAIN_SMS_RECEIVER);
     }
 
     private void checkPermissions() {
         checkPhoneStatePermission();
         checkReadCallLogPermission();
+        checkReceiveSmsPermission();
+        checkReadSmsPermission();
+        checkSendSmsPermission();
+    }
+
+    private void checkReceiveSmsPermission() {
+        int checkResult = checkSelfPermission(Manifest.permission.RECEIVE_SMS);
+        switch (checkResult) {
+            case android.content.pm.PackageManager.PERMISSION_DENIED:
+                permissionReceiveSmsDenied();
+                break;
+            case android.content.pm.PackageManager.PERMISSION_GRANTED:
+                permissionReceiveSmsGranted();
+                break;
+        }
+    }
+
+    private void permissionReceiveSmsDenied() {
+        if (permissionAlreadyRequested.getOrDefault("RECEIVE_SMS", true)) return;
+        if (shouldShowRequestPermissionRationale(Manifest.permission.RECEIVE_SMS)) {
+            permissionAlreadyRequested.put("RECEIVE_SMS",true);
+            showExplanation("Permission Request", "We need this permission to display information about your network operator", Manifest.permission.RECEIVE_SMS, REQUEST_CODE_RECEIVE_SMS);
+        } else {
+            requestPermissions(new String[]{Manifest.permission.RECEIVE_SMS}, REQUEST_CODE_RECEIVE_SMS);
+        }
+
+    }
+
+    private void permissionReceiveSmsGranted() {
+    }
+
+    private void checkReadSmsPermission() {
+
+        int checkResult = checkSelfPermission(Manifest.permission.RECEIVE_SMS);
+        switch (checkResult) {
+            case android.content.pm.PackageManager.PERMISSION_DENIED:
+                permissionReadSmsDenied();
+                break;
+            case android.content.pm.PackageManager.PERMISSION_GRANTED:
+                permissionReadSmsGranted();
+                break;
+        }
+    }
+
+    private void permissionReadSmsGranted() {
+    }
+
+    private void permissionReadSmsDenied() {
+        if (permissionAlreadyRequested.getOrDefault("READ_SMS", true)) return;
+        if (shouldShowRequestPermissionRationale(Manifest.permission.READ_SMS)) {
+            permissionAlreadyRequested.put("READ_SMS",true);
+            showExplanation("Permission Request", "We need this permission to display information about your network operator", Manifest.permission.READ_PHONE_STATE, REQUEST_CODE_READ_PHONE_STATE);
+        } else {
+            requestPermissions(new String[]{Manifest.permission.READ_SMS}, REQUEST_CODE_READ_SMS);
+        }
+    }
+
+    private void checkSendSmsPermission() {
+        int checkResult = checkSelfPermission(Manifest.permission.RECEIVE_SMS);
+        switch (checkResult) {
+            case android.content.pm.PackageManager.PERMISSION_DENIED:
+                permissionSendSmsDenied();
+                break;
+            case android.content.pm.PackageManager.PERMISSION_GRANTED:
+                permissionSendSmsGranted();
+                break;
+        }
+    }
+
+    private void permissionSendSmsGranted() {
+    }
+
+    private void permissionSendSmsDenied() {
+        if (permissionAlreadyRequested.getOrDefault("SEND_SMS", true)) return;
+        if (shouldShowRequestPermissionRationale(Manifest.permission.SEND_SMS)) {
+            permissionAlreadyRequested.put("SEND_SMS",true);
+            showExplanation("Permission Request", "We need this permission to send messages", Manifest.permission.SEND_SMS, REQUEST_CODE_SEND_SMS);
+        } else {
+            requestPermissions(new String[]{Manifest.permission.SEND_SMS}, REQUEST_CODE_SEND_SMS);
+        }
     }
 
     private void checkPhoneStatePermission() {
@@ -88,21 +186,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void permissionReadCallLogDenied() {
-        if (!notAlreadyAsked) return;
+        if (permissionAlreadyRequested.getOrDefault("READ_CALL_LOG", true)) return;
         if (shouldShowRequestPermissionRationale(Manifest.permission.READ_CALL_LOG)) {
-            notAlreadyAsked = false;
-            showExplanation("Permission Request", "We need this permission to display information about your network operator", Manifest.permission.READ_PHONE_STATE, REQUEST_CODE_READ_PHONE_STATE);
+            permissionAlreadyRequested.put("READ_CALL_LOG",true);
+            showExplanation("Permission Request", "We need this permission to handle call information", Manifest.permission.READ_CALL_LOG, REQUEST_CODE_READ_CALL_LOG);
         } else {
             requestPermissions(new String[]{Manifest.permission.READ_CALL_LOG}, REQUEST_CODE_READ_CALL_LOG);
         }
     }
 
-    private boolean notAlreadyAsked = true;
-
     private void permissionPhoneStateDenied() {
-        if (!notAlreadyAsked) return;
+        if (permissionAlreadyRequested.getOrDefault("READ_PHONE_STATE", true)) return;
         if (shouldShowRequestPermissionRationale(Manifest.permission.READ_PHONE_STATE)) {
-            notAlreadyAsked = false;
+            permissionAlreadyRequested.put("READ_PHONE_STATE",true);
             showExplanation("Permission Request", "We need this permission to display information about your network operator", Manifest.permission.READ_PHONE_STATE, REQUEST_CODE_READ_PHONE_STATE);
         } else {
             requestPermissions(new String[]{Manifest.permission.READ_PHONE_STATE}, REQUEST_CODE_READ_PHONE_STATE);
@@ -117,6 +213,13 @@ public class MainActivity extends AppCompatActivity {
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         requestPermissions(new String[]{permission}, permissionRequestCode);
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Toast.makeText(MainActivity.this, "", Toast.LENGTH_SHORT).show();
+                        dialogInterface.cancel();
                     }
                 });
         builder.create().show();
@@ -141,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void permissionPhoneStateGranted() {
-        telephonyManager = (TelephonyManager) getSystemService(Service.TELEPHONY_SERVICE);
+        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Service.TELEPHONY_SERVICE);
         boolean resultOK = checkSelfPermission(Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED;
 
         if (resultOK) {
