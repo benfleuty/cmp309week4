@@ -3,11 +3,14 @@ package uk.ac.abertay.telephonysms;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.DialogInterface;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,12 +21,38 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_READ_CALL_LOG = 2;
     TelephonyManager telephonyManager;
 
+    private final BroadcastReceiver MAIN_BROADCAST_RECEIVER = new CallReceiver();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         checkPermissions();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceivers();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        //unregisterReceivers();
+    }
+
+    private void registerReceivers() {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("android.intent.action.PHONE_STATE");
+        filter.addAction("android.intent.action.NEW_OUTGOING_CALL");
+        filter.addAction("android.intent.action.PROCESS_OUTGOING_CALLS");
+        filter.setPriority(0);
+        registerReceiver(MAIN_BROADCAST_RECEIVER, filter);
+    }
+
+    private void unregisterReceivers() {
+        unregisterReceiver(MAIN_BROADCAST_RECEIVER);
     }
 
     private void checkPermissions() {
