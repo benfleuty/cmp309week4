@@ -85,8 +85,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             permissionPhoneStateDenied();
         }
-
-        return;
     }
 
     private void permissionPhoneStateGranted() {
@@ -98,14 +96,17 @@ public class MainActivity extends AppCompatActivity {
             String operatorId = telephonyManager.getNetworkOperator();
             String countryCode = telephonyManager.getNetworkCountryIso();
             String networkName = telephonyManager.getNetworkOperatorName();
+            String phoneNumber = telephonyManager.getLine1Number();
 
             TextView textCC = findViewById(R.id.textCountryCode);
             TextView textOid = findViewById(R.id.textOperatorID);
             TextView textNetName = findViewById(R.id.textNetworkName);
+            TextView textPhone = findViewById(R.id.textCurrentPhoneNumber);
 
             textCC.setText(countryCode);
             textOid.setText(operatorId);
             textNetName.setText(networkName);
+            textPhone.setText(phoneNumber);
         }
     }
 }
