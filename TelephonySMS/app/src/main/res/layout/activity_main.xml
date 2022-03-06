@@ -9,105 +9,137 @@
     tools:context=".MainActivity">
 
     <LinearLayout
+        android:id="@+id/llgroupNetwork"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="32dp"
         android:orientation="vertical">
 
         <LinearLayout
-            android:id="@+id/llNetworkName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/labelNetworkName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Network Name" />
-
-            <TextView
-                android:id="@+id/textNetworkName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text=".???"
-                android:textAlignment="textEnd" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/llCountryCodeRow"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/labelCountryCode"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Country Code" />
-
-            <TextView
-                android:id="@+id/textCountryCode"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text=".???"
-                android:textAlignment="textEnd" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/llOperatorId"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/labelOperatorID"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Operator ID" />
-
-            <TextView
-                android:id="@+id/textOperatorID"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-
-                android:layout_weight="1"
-                android:text=".???"
-                android:textAlignment="textEnd" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/llPhoneNumber"
+            android:id="@+id/llgroupNetworkDisplayInformation"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="horizontal">
+            android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/labelPhoneNumber"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:id="@+id/llOperatorId"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Phone Number" />
+                android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/textCurrentPhoneNumber"
-                android:layout_width="wrap_content"
+                <TextView
+                    android:id="@+id/labelOperatorID"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Operator ID" />
+
+                <TextView
+                    android:id="@+id/textOperatorID"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+
+                    android:layout_weight="1"
+                    android:text="Unknown"
+                    android:textAlignment="textEnd" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/llNetworkName"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text=".???"
-                android:textAlignment="textEnd" />
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/labelNetworkName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Network Name" />
+
+                <TextView
+                    android:id="@+id/textNetworkName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Unknown"
+                    android:textAlignment="textEnd" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/llPhoneNumber"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/labelPhoneNumber"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Phone Number" />
+
+                <TextView
+                    android:id="@+id/textCurrentPhoneNumber"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Unknown"
+                    android:textAlignment="textEnd" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/llCountryCodeRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/labelCountryCode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Country Code" />
+
+                <TextView
+                    android:id="@+id/textCountryCode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Unknown"
+                    android:textAlignment="textEnd" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnGetPhoneDetails"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="btnGetPhoneDetails_onClick"
+                android:text="Get Phone Details" />
+
         </LinearLayout>
 
-        <Button
-            android:id="@+id/btnGetPhoneDetails"
+        <LinearLayout
+            android:id="@+id/llgroupEnableInformation"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Get Phone Details" />
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/labelNetworkInformationDisabled"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Network Information cannot be displayed without the appropriate permissions." />
+
+            <Button
+                android:id="@+id/btnEnableNetworkInformation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="btnEnableNetworkInformation_onClick"
+                android:text="Enable Network Information" />
+        </LinearLayout>
+
     </LinearLayout>
 
 </LinearLayout>

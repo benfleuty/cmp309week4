@@ -3,16 +3,13 @@ package uk.ac.abertay.telephonysms;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.DialogInterface;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,8 +18,130 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
+    private static final int REQUEST_CODE_READ_PHONE_STATE = 0;
+
+    HashMap<String, Boolean> userIsUneducatedAboutPermission = new HashMap<String, Boolean>() {{
+        put(Manifest.permission.READ_PHONE_STATE, true);
+    }};
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+    }
+
+    private void updatePhoneDetails() {
+        getPermissionState(Manifest.permission.READ_PHONE_STATE, REQUEST_CODE_READ_PHONE_STATE);
+    }
+
+    public void btnEnableNetworkInformation_onClick(View view) {
+        // false if don't ask again
+        String permission = Manifest.permission.READ_PHONE_STATE;
+        if (!shouldShowRequestPermissionRationale(permission)) {
+            showRationale("User Intervention Required",
+                    "You have previously selected 'Do not ask again' for phone permissions. Please enable this permission in settings to enable this application to gather information about your mobile network",
+                    permission,
+                    -1);
+        } else {
+            updatePhoneDetails();
+        }
+    }
+
+    public void btnGetPhoneDetails_onClick(View view) {
+        updatePhoneDetails();
+    }
+
+    private void getPermissionState(final String permission, final int requestCode) {
+        switch (checkSelfPermission(permission)) {
+            case PackageManager.PERMISSION_DENIED:
+                requestPermissions(new String[]{permission}, requestCode);
+                break;
+            case PackageManager.PERMISSION_GRANTED:
+                getPhoneDetails();
+                break;
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        boolean isGranted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+        switch (requestCode) {
+            case REQUEST_CODE_READ_PHONE_STATE:
+                if (isGranted) readPhoneStateGranted();
+                else readPhoneStateDenied(permissions[0]);
+                break;
+            default:
+                Log.wtf("MainActivity/onRequestPermissionsResult", "Permission result for " + permissions[0] + " not implemented!");
+        }
+    }
+
+    private void readPhoneStateDenied(String permission) {
+        if (shouldShowRequestPermissionRationale(permission) && userIsUneducatedAboutPermission.get(permission)) {
+            showRationale("Read Phone State Permission Needed",
+                    "This permission is needed to gather information about your mobile network.",
+                    permission,
+                    REQUEST_CODE_READ_PHONE_STATE);
+            userIsUneducatedAboutPermission.put(permission,false);
+        } else {
+            disableNetworkOperatorInformation();
+        }
+    }
+
+    private void disableNetworkOperatorInformation() {
+        findViewById(R.id.llgroupNetworkDisplayInformation).setVisibility(View.GONE);
+        findViewById(R.id.llgroupEnableInformation).setVisibility(View.VISIBLE);
+    }
+
+    private void enableNetworkOperatorInformation() {
+        findViewById(R.id.llgroupNetworkDisplayInformation).setVisibility(View.VISIBLE);
+        findViewById(R.id.llgroupEnableInformation).setVisibility(View.GONE);
+    }
+
+    private void showRationale(String title, String message, String permission, int requestCode) {
+        new AlertDialog.Builder(this)
+                .setTitle(title)
+                .setMessage(message)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        if (requestCode == -1) return;
+                        requestPermissions(new String[]{permission}, requestCode);
+                    }
+                })
+                .create()
+                .show();
+    }
+
+    private void readPhoneStateGranted() {
+        getPhoneDetails();
+    }
+
+    private void getPhoneDetails() {
+        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Service.TELEPHONY_SERVICE);
+        boolean resultOK = checkSelfPermission(Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED;
+
+        if (resultOK) {
+            String operatorId = telephonyManager.getNetworkOperator();
+            String countryCode = telephonyManager.getNetworkCountryIso();
+            String networkName = telephonyManager.getNetworkOperatorName();
+            String phoneNumber = null;
+            try {
+                phoneNumber = telephonyManager.getLine1Number();
+            } catch (Exception e) {
+                phoneNumber = "Unknown";
+            }
+            TextView textCC = findViewById(R.id.textCountryCode);
+            TextView textOid = findViewById(R.id.textOperatorID);
+            TextView textNetName = findViewById(R.id.textNetworkName);
+            TextView textPhone = findViewById(R.id.textCurrentPhoneNumber);
+
+            textCC.setText(countryCode);
+            textOid.setText(operatorId);
+            textNetName.setText(networkName);
+            textPhone.setText(phoneNumber);
+
+            enableNetworkOperatorInformation();
+        }
     }
 }
