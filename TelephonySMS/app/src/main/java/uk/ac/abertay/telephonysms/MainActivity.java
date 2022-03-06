@@ -37,9 +37,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        //unregisterReceivers();
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceivers();
     }
 
     private void registerReceivers() {
