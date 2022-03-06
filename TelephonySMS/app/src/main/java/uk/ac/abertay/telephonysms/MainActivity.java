@@ -6,6 +6,7 @@ import android.app.Service;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
@@ -15,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.time.temporal.Temporal;
 import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
@@ -28,6 +30,36 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        setPhoneStateListener();
+    }
+
+    private void setPhoneStateListener() {
+        String TAG = "PhoneStateListener";
+        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+        PhoneStateListener phoneStateListener = new PhoneStateListener(){
+            @Override
+            public void onCallStateChanged(int state, String phoneNumber) {
+                super.onCallStateChanged(state, phoneNumber);
+                switch (state) {
+                    case TelephonyManager.CALL_STATE_IDLE:
+                        Log.i(TAG,"Call state is idle");
+                        break;
+                    case TelephonyManager.CALL_STATE_OFFHOOK:
+                        Log.i(TAG,"Call state is off hook");
+                        break;
+                    case TelephonyManager.CALL_STATE_RINGING:
+                        Log.i(TAG,"Call state is ringing");
+                        break;
+                    default:
+                        throw new IllegalStateException("Unexpected value: " + state);
+                }
+            }
+        };
+
+        telephonyManager.listen(phoneStateListener,PhoneStateListener.LISTEN_CALL_STATE);
+
+
     }
 
     private void updatePhoneDetails() {
@@ -144,4 +176,5 @@ public class MainActivity extends AppCompatActivity {
             enableNetworkOperatorInformation();
         }
     }
+
 }
