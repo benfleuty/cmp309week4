@@ -15,6 +15,8 @@ import androidx.appcompat.app.AppCompatActivity;
 public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE_READ_PHONE_STATE = 1;
+    private static final int REQUEST_CODE_READ_CALL_LOG = 2;
+    TelephonyManager telephonyManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void checkPermissions() {
         checkPhoneStatePermission();
+        checkReadCallLogPermission();
     }
 
     private void checkPhoneStatePermission() {
@@ -40,10 +43,35 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void checkReadCallLogPermission() {
+        int checkResult = checkSelfPermission(Manifest.permission.READ_CALL_LOG);
+        switch (checkResult) {
+            case android.content.pm.PackageManager.PERMISSION_DENIED:
+                permissionReadCallLogDenied();
+                break;
+            case android.content.pm.PackageManager.PERMISSION_GRANTED:
+                permissionReadCallLogGranted();
+                break;
+        }
+    }
+
+    private void permissionReadCallLogGranted() {
+    }
+
+    private void permissionReadCallLogDenied() {
+        if (!notAlreadyAsked) return;
+        if (shouldShowRequestPermissionRationale(Manifest.permission.READ_CALL_LOG)) {
+            notAlreadyAsked = false;
+            showExplanation("Permission Request", "We need this permission to display information about your network operator", Manifest.permission.READ_PHONE_STATE, REQUEST_CODE_READ_PHONE_STATE);
+        } else {
+            requestPermissions(new String[]{Manifest.permission.READ_CALL_LOG}, REQUEST_CODE_READ_CALL_LOG);
+        }
+    }
+
     private boolean notAlreadyAsked = true;
 
     private void permissionPhoneStateDenied() {
-        if (!notAlreadyAsked)return;
+        if (!notAlreadyAsked) return;
         if (shouldShowRequestPermissionRationale(Manifest.permission.READ_PHONE_STATE)) {
             notAlreadyAsked = false;
             showExplanation("Permission Request", "We need this permission to display information about your network operator", Manifest.permission.READ_PHONE_STATE, REQUEST_CODE_READ_PHONE_STATE);
@@ -53,10 +81,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // from https://stackoverflow.com/questions/35484767/activitycompat-requestpermissions-not-showing-dialog-box/35486162#35486162
-    private void showExplanation(String title,
-                                 String message,
-                                 final String permission,
-                                 final int permissionRequestCode) {
+    private void showExplanation(String title, String message, final String permission, final int permissionRequestCode) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(title)
                 .setMessage(message)
@@ -67,7 +92,6 @@ public class MainActivity extends AppCompatActivity {
                 });
         builder.create().show();
     }
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -88,7 +112,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void permissionPhoneStateGranted() {
-        TelephonyManager telephonyManager;
         telephonyManager = (TelephonyManager) getSystemService(Service.TELEPHONY_SERVICE);
         boolean resultOK = checkSelfPermission(Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED;
 
