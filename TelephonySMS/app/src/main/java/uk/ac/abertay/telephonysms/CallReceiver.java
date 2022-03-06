@@ -24,21 +24,6 @@ public class CallReceiver extends BroadcastReceiver {
         if (action.equals(TelephonyManager.ACTION_PHONE_STATE_CHANGED)) {
             actionPhoneStateChanged(context, intent);
         }
-
-/*
-
-        Toast.makeText(context, "last action (" + lastAction + ") set to: " + action, Toast.LENGTH_SHORT).show();
-
-        lastAction = action;
-        /*
-        if (action.equals(TelephonyManager.ACTION_PHONE_STATE_CHANGED)) {
-            actionPhoneStateChanged(context, intent);
-        }
-
-        if (action.equals(Intent.ACTION_NEW_OUTGOING_CALL)){
-            actionNewOutgoingCall(context, intent);
-        }
-         */
     }
 
     private void actionNewOutgoingCall(Context context, Intent intent) {
@@ -68,6 +53,8 @@ public class CallReceiver extends BroadcastReceiver {
 
         // Outgoing call
         else if (state.equals(OFFHOOK) && lastState.equals(IDLE)) {
+            Log.i(TAG, "To: " + number);
+           // this.setResultData("0123456789"); todo make this work
             Toast.makeText(context, "Outgoing call to " + number, Toast.LENGTH_SHORT).show();
             Log.i(TAG, "Outgoing call to " + number);
         }
