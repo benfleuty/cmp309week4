@@ -3,7 +3,9 @@ package uk.ac.abertay.telephonysms;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.DialogInterface;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.telephony.PhoneStateListener;
@@ -16,14 +18,17 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.time.temporal.Temporal;
 import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_READ_PHONE_STATE = 0;
+    private static final int REQUEST_CODE_READ_CALL_LOG = 1;
+
+    private final BroadcastReceiver MAIN_BROADCAST_RECEIVER = new CallReceiver();
 
     HashMap<String, Boolean> userIsUneducatedAboutPermission = new HashMap<String, Boolean>() {{
         put(Manifest.permission.READ_PHONE_STATE, true);
+        put(Manifest.permission.READ_CALL_LOG, true);
     }};
 
     @Override
@@ -31,19 +36,49 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        setPhoneStateListener();
+        //setPhoneStateListener();
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceivers();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceivers();
+    }
+
+    private void registerReceivers() {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("android.intent.action.PHONE_STATE");
+        filter.addAction("android.intent.action.NEW_OUTGOING_CALL");
+        filter.addAction("android.intent.action.PROCESS_OUTGOING_CALLS");
+        registerReceiver(MAIN_BROADCAST_RECEIVER, filter);
+
+    }
+
+    private void unregisterReceivers() {
+        unregisterReceiver(MAIN_BROADCAST_RECEIVER);
     }
 
     private void setPhoneStateListener() {
+        getPermissionState(Manifest.permission.READ_CALL_LOG, REQUEST_CODE_READ_CALL_LOG);
+
+        boolean resultOK = checkSelfPermission(Manifest.permission.READ_CALL_LOG) == PackageManager.PERMISSION_GRANTED;
+
+        if (!resultOK) return;
+
         String TAG = "PhoneStateListener";
         TelephonyManager telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
-        PhoneStateListener phoneStateListener = new PhoneStateListener(){
+        PhoneStateListener phoneStateListener = new PhoneStateListener() {
             @Override
             public void onCallStateChanged(int state, String phoneNumber) {
                 super.onCallStateChanged(state, phoneNumber);
                 switch (state) {
                     case TelephonyManager.CALL_STATE_IDLE:
-                        Log.i(TAG,"Call state is idle");
+                        Log.i(TAG, "Call state is idle");
                         break;
                     case TelephonyManager.CALL_STATE_OFFHOOK:
                         Log.i(TAG,"Call state is off hook");
@@ -58,8 +93,6 @@ public class MainActivity extends AppCompatActivity {
         };
 
         telephonyManager.listen(phoneStateListener,PhoneStateListener.LISTEN_CALL_STATE);
-
-
     }
 
     private void updatePhoneDetails() {
@@ -103,8 +136,27 @@ public class MainActivity extends AppCompatActivity {
                 if (isGranted) readPhoneStateGranted();
                 else readPhoneStateDenied(permissions[0]);
                 break;
+            case REQUEST_CODE_READ_CALL_LOG:
+                if (isGranted) readCallLogGranted();
+                else readCallLogDenied(permissions[0]);
             default:
                 Log.wtf("MainActivity/onRequestPermissionsResult", "Permission result for " + permissions[0] + " not implemented!");
+        }
+    }
+
+    private void readCallLogGranted() {
+    }
+
+    private void readCallLogDenied(String permission) {
+        if (shouldShowRequestPermissionRationale(permission) && userIsUneducatedAboutPermission.get(permission)) {
+            showRationale("Read Call Log Permission Needed",
+                    "This permission is needed to obtain the phone number you are calling / is calling you.",
+                    permission,
+                    REQUEST_CODE_READ_CALL_LOG);
+            userIsUneducatedAboutPermission.put(permission, false);
+        } else {
+            Log.d("DEBUG",
+                    "no rationale needed");
         }
     }
 
@@ -114,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
                     "This permission is needed to gather information about your mobile network.",
                     permission,
                     REQUEST_CODE_READ_PHONE_STATE);
-            userIsUneducatedAboutPermission.put(permission,false);
+            userIsUneducatedAboutPermission.put(permission, false);
         } else {
             disableNetworkOperatorInformation();
         }

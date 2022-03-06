@@ -19,7 +19,10 @@ public class CallReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
-        if (intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER) == null) return;
+        if (intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER) == null) {
+            Log.d("DEBUG","Rejecting call as phone number is null");
+            return;
+        }
 
         if (action.equals(TelephonyManager.ACTION_PHONE_STATE_CHANGED)) {
             actionPhoneStateChanged(context, intent);
@@ -27,9 +30,10 @@ public class CallReceiver extends BroadcastReceiver {
     }
     private void actionPhoneStateChanged(Context context, Intent intent) {
         String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
-        final String TAG = "PhoneStateListener";
         final String number = intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER);
 
+
+        Log.i(TAG, "State is " + state + " and last state is " + lastState);
         // Incoming Call
         if (state.equals(RINGING) && lastState.equals(IDLE)) {
             String message = "Incoming call from " + number;
@@ -46,8 +50,6 @@ public class CallReceiver extends BroadcastReceiver {
 
         // Outgoing call
         else if (state.equals(OFFHOOK) && lastState.equals(IDLE)) {
-            Log.i(TAG, "To: " + number);
-           // this.setResultData("0123456789"); todo make this work
             Toast.makeText(context, "Outgoing call to " + number, Toast.LENGTH_SHORT).show();
             Log.i(TAG, "Outgoing call to " + number);
         }
