@@ -96,8 +96,12 @@ public class MainActivity extends AppCompatActivity {
             String operatorId = telephonyManager.getNetworkOperator();
             String countryCode = telephonyManager.getNetworkCountryIso();
             String networkName = telephonyManager.getNetworkOperatorName();
-            String phoneNumber = telephonyManager.getLine1Number();
-
+            String phoneNumber = null;
+            try {
+                phoneNumber = telephonyManager.getLine1Number();
+            } catch (Exception e) {
+                phoneNumber = "Unknown";
+            }
             TextView textCC = findViewById(R.id.textCountryCode);
             TextView textOid = findViewById(R.id.textOperatorID);
             TextView textNetName = findViewById(R.id.textNetworkName);
