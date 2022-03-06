@@ -107,6 +107,7 @@
             android:id="@+id/btnGetPhoneDetails"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:onClick="btnGetPhoneDetails_Click"
             android:text="Get Phone Details" />
     </LinearLayout>
 

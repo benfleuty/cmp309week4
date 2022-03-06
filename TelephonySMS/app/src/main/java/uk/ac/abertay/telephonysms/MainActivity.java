@@ -10,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,7 +42,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        checkPermissions();
     }
 
     @Override
@@ -244,6 +244,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void permissionPhoneStateGranted() {
+
+    }
+
+    public void btnGetPhoneDetails_Click(View view){
+        getPhoneDetails();
+    }
+
+    private void getPhoneDetails() {
+        checkPhoneStatePermission();
+        checkReadCallLogPermission();
+
         TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Service.TELEPHONY_SERVICE);
         boolean resultOK = checkSelfPermission(Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED;
 
