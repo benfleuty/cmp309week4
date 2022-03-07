@@ -142,4 +142,12 @@
 
     </LinearLayout>
 
+    <Button
+        android:id="@+id/buttonOpenSendSms"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="buttonOpenSendSms_onClick"
+        android:text="Send an SMS"
+        tools:ignore="OnClick" />
+
 </LinearLayout>

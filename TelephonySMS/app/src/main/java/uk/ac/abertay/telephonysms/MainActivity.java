@@ -293,4 +293,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void buttonOpenSendSms_onClick(View view) {
+    }
 }
