@@ -30,13 +30,13 @@ public class SmsSender extends AppCompatActivity {
     private void sendSms() {
         if (!checkSendSmsPermission()) return;
 
-        String phoneNumber = ((EditText) findViewById(R.id.txtPhoneNumber)).getText().toString();
-        String message  = ((EditText) findViewById(R.id.)).getText().toString();
+        String phoneNumber = ((EditText) findViewById(R.id.textPhoneNumber)).getText().toString();
+        String message  = ((EditText) findViewById(R.id.textSmsMessage)).getText().toString();
 
         Intent sentIntent = new Intent("SENT_SMS_ACTION");
         PendingIntent sentPendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 5, sentIntent, 0);
         SmsManager smsManager = SmsManager.getDefault();
-        smsManager.sendTextMessage();
+        smsManager.sendTextMessage(phoneNumber,null,message,sentPendingIntent,null);
     }
 
     private void registerSmsSender() {
