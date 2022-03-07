@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE_READ_PHONE_STATE = 0;
     private static final int REQUEST_CODE_READ_CALL_LOG = 1;
-    private static final int REQUEST_CODE_RECEIVE_SMS = 2;
+    public static final int REQUEST_CODE_RECEIVE_SMS = 2;
     private static final int REQUEST_CODE_STARTUP = 3;
 
     private final BroadcastReceiver INCOMING_CALL_RECEIVER = new CallReceiver();
