@@ -13,7 +13,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.telephony.SmsManager;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -28,7 +31,31 @@ public class SmsSender extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sms_sender);
         registerSmsSender();
+        initialiseTextWatchers();
     }
+
+    private void initialiseTextWatchers() {
+        EditText recipient = findViewById(R.id.textSmsRecipient);
+        EditText message = findViewById(R.id.textSmsMessage);
+
+        recipient.addTextChangedListener(ensureFilledFields);
+        message.addTextChangedListener(ensureFilledFields);
+    }
+
+    TextWatcher ensureFilledFields = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            EditText recipient = findViewById(R.id.textSmsRecipient);
+            EditText message = findViewById(R.id.textSmsMessage);
+            Button send = findViewById(R.id.buttonSendSms);
+            send.setEnabled(recipient.length() != 0 && message.length() != 0);
+        }
+    };
 
     private static final int GET_CONTACT_REQUEST = 1;
 
@@ -92,8 +119,12 @@ public class SmsSender extends AppCompatActivity {
         smsManager.sendTextMessage(phoneNumber,null,message,sentPendingIntent,null);
     }
 
-    public void btnSendSms_onClick(View view) {
+    public void buttonSelectContact_onClick(View view){
         getAContact();
+    }
+
+    public void buttonSendSms_onClick(View view) {
+        sendSms();
     }
 
     private void getAContact() {
