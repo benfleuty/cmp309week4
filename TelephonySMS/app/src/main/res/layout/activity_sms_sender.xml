@@ -80,6 +80,7 @@
 
     <Button
         android:id="@+id/buttonSendSms"
+        android:enabled="false"
         android:layout_marginHorizontal="32dp"
         android:layout_height="wrap_content"
         android:text="Send SMS"
