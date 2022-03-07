@@ -14,11 +14,12 @@ public class CallReceiver extends BroadcastReceiver {
     private static final String RINGING = TelephonyManager.EXTRA_STATE_RINGING;
     private static final String OFFHOOK = TelephonyManager.EXTRA_STATE_OFFHOOK;
     private static final String IDLE = TelephonyManager.EXTRA_STATE_IDLE;
-    String lastState = "IDLE";
+    String lastState = IDLE;
 
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
+        // todo check if this is no longer needed
         if (intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER) == null) {
             Log.d("DEBUG","Rejecting call as phone number is null");
             return;

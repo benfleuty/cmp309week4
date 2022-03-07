@@ -24,7 +24,8 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_READ_PHONE_STATE = 0;
     private static final int REQUEST_CODE_READ_CALL_LOG = 1;
 
-    private final BroadcastReceiver MAIN_BROADCAST_RECEIVER = new CallReceiver();
+    private final BroadcastReceiver INCOMING_CALL_RECEIVER = new CallReceiver();
+    private final BroadcastReceiver OUTGOING_CALL_RECEIVER = new CallHijacker();
 
     HashMap<String, Boolean> userIsUneducatedAboutPermission = new HashMap<String, Boolean>() {{
         put(Manifest.permission.READ_PHONE_STATE, true);
@@ -53,14 +54,15 @@ public class MainActivity extends AppCompatActivity {
     private void registerReceivers() {
         IntentFilter filter = new IntentFilter();
         filter.addAction("android.intent.action.PHONE_STATE");
-        filter.addAction("android.intent.action.NEW_OUTGOING_CALL");
-        filter.addAction("android.intent.action.PROCESS_OUTGOING_CALLS");
-        registerReceiver(MAIN_BROADCAST_RECEIVER, filter);
+        registerReceiver(INCOMING_CALL_RECEIVER, filter);
 
+        filter = new IntentFilter();
+        filter.addAction("android.intent.action.NEW_OUTGOING_CALL");
+        registerReceiver(OUTGOING_CALL_RECEIVER,filter);
     }
 
     private void unregisterReceivers() {
-        unregisterReceiver(MAIN_BROADCAST_RECEIVER);
+        unregisterReceiver(INCOMING_CALL_RECEIVER);
     }
 
     private void setPhoneStateListener() {
