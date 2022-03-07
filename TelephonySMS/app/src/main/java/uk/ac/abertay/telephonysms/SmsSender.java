@@ -24,7 +24,6 @@ public class SmsSender extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sms_sender);
         registerSmsSender();
-        sendSms();
     }
 
     private void sendSms() {

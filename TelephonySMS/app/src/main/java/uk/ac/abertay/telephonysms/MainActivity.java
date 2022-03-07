@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         put(REQUEST_CODE_READ_PHONE_STATE, new String[]{Manifest.permission.READ_PHONE_STATE});
         put(REQUEST_CODE_READ_CALL_LOG, new String[]{Manifest.permission.READ_CALL_LOG});
         put(REQUEST_CODE_RECEIVE_SMS, new String[]{Manifest.permission.RECEIVE_SMS});
-        put(REQUEST_CODE_STARTUP, new String[]{Manifest.permission.READ_CALL_LOG, Manifest.permission.RECEIVE_SMS});
+        put(REQUEST_CODE_STARTUP, new String[]{Manifest.permission.READ_CALL_LOG, Manifest.permission.RECEIVE_SMS, Manifest.permission.SEND_SMS});
     }};
     private final BroadcastReceiver INCOMING_SMS_RECEIVER = new IncomingSmsReceiver();
     HashMap<String, Boolean> userIsUneducatedAboutPermission = new HashMap<String, Boolean>() {{
@@ -188,10 +188,29 @@ public class MainActivity extends AppCompatActivity {
                     if (isGranted) receiveSmsGranted();
                     else receiveSmsDenied(permissions[i]);
                     break;
+                case Manifest.permission.SEND_SMS:
+                    if (isGranted) sendSmsGranted();
+                    else sendSmsDenied(permissions[i]);
+                    break;
                 default:
                     Log.wtf("MainActivity/onRequestPermissionsResult", "Permission result for " + permissions[i] + " not implemented!");
             }
         }
+    }
+
+    private void sendSmsDenied(String permission) {
+        if (shouldShowRequestPermissionRationale(permission) && userIsUneducatedAboutPermission.get(permission)) {
+            showRationale("Receive SMS Permission Needed",
+                    "This permission is needed to detect when an SMS message is received.",
+                    permission,
+                    REQUEST_CODE_RECEIVE_SMS);
+            userIsUneducatedAboutPermission.put(permission, false);
+        } else {
+            Log.d("DEBUG", "no rationale needed");
+        }
+    }
+
+    private void sendSmsGranted() {
     }
 
     private void receiveSmsDenied(String permission) {
