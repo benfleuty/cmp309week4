@@ -9,12 +9,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.service.carrier.CarrierMessagingService;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -30,14 +30,21 @@ public class MainActivity extends AppCompatActivity {
     public static final int REQUEST_CODE_RECEIVE_SMS = 2;
     private static final int REQUEST_CODE_STARTUP = 3;
 
-    private final BroadcastReceiver INCOMING_CALL_RECEIVER = new CallReceiver();
-    private final BroadcastReceiver OUTGOING_CALL_RECEIVER = new CallHijacker();
     private static final HashMap<Integer, String[]> permissionRequests = new HashMap<Integer, String[]>() {{
         put(REQUEST_CODE_READ_PHONE_STATE, new String[]{Manifest.permission.READ_PHONE_STATE});
         put(REQUEST_CODE_READ_CALL_LOG, new String[]{Manifest.permission.READ_CALL_LOG});
         put(REQUEST_CODE_RECEIVE_SMS, new String[]{Manifest.permission.RECEIVE_SMS});
         put(REQUEST_CODE_STARTUP, new String[]{Manifest.permission.READ_CALL_LOG, Manifest.permission.RECEIVE_SMS, Manifest.permission.SEND_SMS});
     }};
+
+    private static final String RINGING = TelephonyManager.EXTRA_STATE_RINGING;
+    private static final String OFF_HOOK = TelephonyManager.EXTRA_STATE_OFFHOOK;
+    private static final String IDLE = TelephonyManager.EXTRA_STATE_IDLE;
+    private static final String lastState = IDLE;
+    private static PhoneStateListener phoneStateListener = null;
+    private final BroadcastReceiver INCOMING_CALL_RECEIVER = new CallReceiver();
+    private final BroadcastReceiver OUTGOING_CALL_RECEIVER = new CallHijacker();
+
     private final BroadcastReceiver INCOMING_SMS_RECEIVER = new IncomingSmsReceiver();
     HashMap<String, Boolean> userIsUneducatedAboutPermission = new HashMap<String, Boolean>() {{
         put(Manifest.permission.READ_PHONE_STATE, true);
@@ -49,8 +56,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-//        setPhoneStateListener();
+        setPhoneStateListener();
     }
 
     @Override
@@ -100,34 +106,37 @@ public class MainActivity extends AppCompatActivity {
 
     private void setPhoneStateListener() {
         getPermissionState(Manifest.permission.READ_CALL_LOG, REQUEST_CODE_READ_CALL_LOG);
-
         boolean resultOK = checkSelfPermission(Manifest.permission.READ_CALL_LOG) == PackageManager.PERMISSION_GRANTED;
-
         if (!resultOK) return;
 
         String TAG = "PhoneStateListener";
         TelephonyManager telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
-        PhoneStateListener phoneStateListener = new PhoneStateListener() {
+        phoneStateListener = new PhoneStateListener() {
             @Override
             public void onCallStateChanged(int state, String phoneNumber) {
-                super.onCallStateChanged(state, phoneNumber);
+                String message;
                 switch (state) {
                     case TelephonyManager.CALL_STATE_IDLE:
-                        Log.i(TAG, "Call state is idle");
-                        break;
-                    case TelephonyManager.CALL_STATE_OFFHOOK:
-                        Log.i(TAG,"Call state is off hook");
+                        message = "IDLE";
                         break;
                     case TelephonyManager.CALL_STATE_RINGING:
-                        Log.i(TAG,"Call state is ringing");
+                        message = "RINGING";
+                        break;
+                    case TelephonyManager.CALL_STATE_OFFHOOK:
+                        message = "OFF HOOK";
                         break;
                     default:
-                        throw new IllegalStateException("Unexpected value: " + state);
+                        message = "Unexpected";
                 }
+
+                String output = "Call state is now: " + message;
+
+                if (message.equals("Unexpected")) Log.wtf(TAG,output);
+                else Log.d(TAG,output);
             }
         };
 
-        telephonyManager.listen(phoneStateListener,PhoneStateListener.LISTEN_CALL_STATE);
+        telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
     }
 
     private void updatePhoneDetails() {
