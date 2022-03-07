@@ -113,6 +113,10 @@ public class SmsSender extends AppCompatActivity {
         String phoneNumber = ((EditText) findViewById(R.id.textSmsRecipient)).getText().toString();
         String message = ((EditText) findViewById(R.id.textSmsMessage)).getText().toString();
 
+        // last ditch effort to prevent an error
+        // shouldn't ever get to this though
+        if(phoneNumber.length() == 0 || message.length() == 0) return;
+
         Intent sentIntent = new Intent("SENT_SMS_ACTION");
         PendingIntent sentPendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 5, sentIntent, 0);
         SmsManager smsManager = SmsManager.getDefault();
