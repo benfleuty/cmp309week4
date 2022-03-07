@@ -4,7 +4,6 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Service;
 import android.content.BroadcastReceiver;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -14,7 +13,6 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -37,11 +35,8 @@ public class MainActivity extends AppCompatActivity {
         put(REQUEST_CODE_STARTUP, new String[]{Manifest.permission.READ_CALL_LOG, Manifest.permission.RECEIVE_SMS, Manifest.permission.SEND_SMS});
     }};
 
-    private static final String RINGING = TelephonyManager.EXTRA_STATE_RINGING;
-    private static final String OFF_HOOK = TelephonyManager.EXTRA_STATE_OFFHOOK;
-    private static final String IDLE = TelephonyManager.EXTRA_STATE_IDLE;
-    private static final String lastState = IDLE;
-    private static PhoneStateListener phoneStateListener = null;
+    private static PhoneStateListener phoneStateListener;
+    private static TelephonyManager telephonyManager;
     private final BroadcastReceiver INCOMING_CALL_RECEIVER = new CallReceiver();
     private final BroadcastReceiver OUTGOING_CALL_RECEIVER = new CallHijacker();
 
@@ -70,28 +65,21 @@ public class MainActivity extends AppCompatActivity {
         requestPermissions(permissionRequests.get(REQUEST_CODE_STARTUP),REQUEST_CODE_STARTUP);
     }
 
-    private void checkReadCallLogPermission() {
-        getPermissionState(Manifest.permission.READ_CALL_LOG, REQUEST_CODE_READ_CALL_LOG);
-    }
-
-    private void checkSmsReceivePermission() {
-        getPermissionState(Manifest.permission.RECEIVE_SMS, REQUEST_CODE_RECEIVE_SMS);
-    }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        telephonyManager.listen(phoneStateListener,PhoneStateListener.LISTEN_NONE);
         unregisterReceivers();
     }
 
     private void registerReceivers() {
-        IntentFilter filter = new IntentFilter();
-        filter.addAction("android.intent.action.PHONE_STATE");
-        registerReceiver(INCOMING_CALL_RECEIVER, filter);
+//        IntentFilter filter = new IntentFilter();
+//        filter.addAction("android.intent.action.PHONE_STATE");
+//        registerReceiver(INCOMING_CALL_RECEIVER, filter);
 
-        filter = new IntentFilter();
-        filter.addAction("android.intent.action.NEW_OUTGOING_CALL");
-        registerReceiver(OUTGOING_CALL_RECEIVER, filter);
+        IntentFilter filter = new IntentFilter();
+//        filter.addAction("android.intent.action.NEW_OUTGOING_CALL");
+//        registerReceiver(OUTGOING_CALL_RECEIVER, filter);
 
         filter = new IntentFilter();
         filter.addAction("android.provider.Telephony.SMS_RECEIVED");
@@ -99,7 +87,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void unregisterReceivers() {
-        unregisterReceiver(INCOMING_CALL_RECEIVER);
         unregisterReceiver(OUTGOING_CALL_RECEIVER);
         unregisterReceiver(INCOMING_SMS_RECEIVER);
     }
@@ -110,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
         if (!resultOK) return;
 
         String TAG = "PhoneStateListener";
-        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+        telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
         phoneStateListener = new PhoneStateListener() {
             @Override
             public void onCallStateChanged(int state, String phoneNumber) {
@@ -131,8 +118,8 @@ public class MainActivity extends AppCompatActivity {
 
                 String output = "Call state is now: " + message;
 
-                if (message.equals("Unexpected")) Log.wtf(TAG,output);
-                else Log.d(TAG,output);
+                if (message.equals("Unexpected")) Log.wtf(TAG, output);
+                else Log.d(TAG, output);
             }
         };
 
@@ -280,12 +267,9 @@ public class MainActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle(title)
                 .setMessage(message)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        if (requestCode == -1) return;
-                        requestPermissions(new String[]{permission}, requestCode);
-                    }
+                .setPositiveButton(android.R.string.ok, (dialogInterface, i) -> {
+                    if (requestCode == -1) return;
+                    requestPermissions(new String[]{permission}, requestCode);
                 })
                 .create()
                 .show();
@@ -303,7 +287,7 @@ public class MainActivity extends AppCompatActivity {
             String operatorId = telephonyManager.getNetworkOperator();
             String countryCode = telephonyManager.getNetworkCountryIso();
             String networkName = telephonyManager.getNetworkOperatorName();
-            String phoneNumber = null;
+            String phoneNumber;
             try {
                 phoneNumber = telephonyManager.getLine1Number();
             } catch (Exception e) {

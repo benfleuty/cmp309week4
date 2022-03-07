@@ -9,13 +9,32 @@ import android.widget.Toast;
 
 public class CallReceiver extends BroadcastReceiver {
 
+    final String TAG = this.getClass().getSimpleName();
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        if (intent.getAction().equals(TelephonyManager.ACTION_PHONE_STATE_CHANGED)) {
+            String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
+            String phoneNumber = intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER);
+            if (phoneNumber == null) return;
+
+            Toast.makeText(context, "State: " + state + " Number: " + phoneNumber, Toast.LENGTH_SHORT).show();
+        }
+        if (intent.getAction().equals(Intent.ACTION_NEW_OUTGOING_CALL)) {
+            String oldNumber = intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER);
+            Log.e(TAG, "To: " + oldNumber);
+            this.setResultData("0123456789");
+        }
+    }
+
+    /*
+
     final String TAG = "BroadcastReceiver";
 
     private static final String RINGING = TelephonyManager.EXTRA_STATE_RINGING;
     private static final String OFFHOOK = TelephonyManager.EXTRA_STATE_OFFHOOK;
     private static final String IDLE = TelephonyManager.EXTRA_STATE_IDLE;
     String lastState = IDLE;
-
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
@@ -33,44 +52,34 @@ public class CallReceiver extends BroadcastReceiver {
         String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
         final String number = intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER);
 
-
         Log.i(TAG, "State is " + state + " and last state was " + lastState);
+
+        String message = "error";
+
         // Incoming Call
-        if (state.equals(RINGING) && lastState.equals(IDLE)) {
-            String message = "Incoming call from " + number;
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
-            Log.i(TAG, message);
-        }
+        if (state.equals(RINGING) && lastState.equals(IDLE))
+            message = "Incoming call from " + number;
 
         // Answer call
-        else if (state.equals(OFFHOOK) && lastState.equals(RINGING)) {
-            String message = "Answered call from " + number;
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
-            Log.i(TAG, message);
-        }
+        else if (state.equals(OFFHOOK) && lastState.equals(RINGING))
+            message = "Answered call from " + number;
 
         // Outgoing call
-        else if (state.equals(OFFHOOK) && lastState.equals(IDLE)) {
-            Toast.makeText(context, "Outgoing call to " + number, Toast.LENGTH_SHORT).show();
+        else if (state.equals(OFFHOOK) && lastState.equals(IDLE))
             Log.i(TAG, "Outgoing call to " + number);
 
-
-        }
-
         // Hang up
-        else if (state.equals(IDLE) && lastState.equals(OFFHOOK)) {
-            String message = "Terminated call with " + number;
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
-            Log.i(TAG, message);
-        }
+        else if (state.equals(IDLE) && lastState.equals(OFFHOOK))
+            message = "Terminated call with " + number;
 
         // Reject call
-        else if (state.equals(IDLE) && lastState.equals(RINGING)){
-            String message = "Rejected call with " + number;
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
-            Log.i(TAG, message);
-        }
+        else if (state.equals(IDLE) && lastState.equals(RINGING))
+            message = "Rejected call with " + number;
+
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+        Log.d(TAG,message);
 
         lastState = state;
     }
+ */
 }
