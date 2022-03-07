@@ -169,24 +169,21 @@ public class MainActivity extends AppCompatActivity {
         }
 
         for (int i = 0; i < permissions.length; i++) {
-            boolean isGranted = grantResults[i] == PackageManager.PERMISSION_GRANTED;
+            boolean notGranted = grantResults[i] != PackageManager.PERMISSION_GRANTED;
 
             switch (permissions[i]) {
                 case Manifest.permission.READ_PHONE_STATE:
-                    if (isGranted) readPhoneStateGranted();
+                    if (notGranted) readPhoneStateGranted();
                     else readPhoneStateDenied(permissions[i]);
                     break;
                 case Manifest.permission.READ_CALL_LOG:
-                    if (isGranted) readCallLogGranted();
-                    else readCallLogDenied(permissions[i]);
+                    if (notGranted)  readCallLogDenied(permissions[i]);
                     break;
                 case Manifest.permission.RECEIVE_SMS:
-                    if (isGranted) receiveSmsGranted();
-                    else receiveSmsDenied(permissions[i]);
+                    if (notGranted)  receiveSmsDenied(permissions[i]);
                     break;
                 case Manifest.permission.SEND_SMS:
-                    if (isGranted) sendSmsGranted();
-                    else sendSmsDenied(permissions[i]);
+                    if (notGranted)  sendSmsDenied(permissions[i]);
                     break;
                 default:
                     Log.wtf("MainActivity/onRequestPermissionsResult", "Permission result for " + permissions[i] + " not implemented!");
@@ -206,9 +203,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void sendSmsGranted() {
-    }
-
     private void receiveSmsDenied(String permission) {
         if (shouldShowRequestPermissionRationale(permission) && userIsUneducatedAboutPermission.get(permission)) {
             showRationale("Receive SMS Permission Needed",
@@ -219,13 +213,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Log.d("DEBUG", "no rationale needed");
         }
-    }
-
-    private void receiveSmsGranted() {
-
-    }
-
-    private void readCallLogGranted() {
     }
 
     private void readCallLogDenied(String permission) {
