@@ -2,6 +2,7 @@ package uk.ac.abertay.telephonysms;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -22,9 +24,23 @@ public class SmsSender extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sms_sender);
         registerSmsSender();
+        sendSms();
+    }
+
+    private void sendSms() {
+        if (!checkSendSmsPermission()) return;
+
+        String phoneNumber = ((EditText) findViewById(R.id.txtPhoneNumber)).getText().toString();
+        String message  = ((EditText) findViewById(R.id.)).getText().toString();
+
+        Intent sentIntent = new Intent("SENT_SMS_ACTION");
+        PendingIntent sentPendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 5, sentIntent, 0);
+        SmsManager smsManager = SmsManager.getDefault();
+        smsManager.sendTextMessage();
     }
 
     private void registerSmsSender() {
+        // don't register the listener if not permitted to send
         if (!checkSendSmsPermission()) return;
         registerReceiver(new BroadcastReceiver() {
             @Override
