@@ -5,9 +5,11 @@ import android.app.AlertDialog;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.service.carrier.CarrierMessagingService;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -294,5 +296,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void buttonOpenSendSms_onClick(View view) {
+        startActivity(new Intent(this, SmsSender.class));
     }
 }
