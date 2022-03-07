@@ -34,7 +34,7 @@ public class CallReceiver extends BroadcastReceiver {
         final String number = intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER);
 
 
-        Log.i(TAG, "State is " + state + " and last state is " + lastState);
+        Log.i(TAG, "State is " + state + " and last state was " + lastState);
         // Incoming Call
         if (state.equals(RINGING) && lastState.equals(IDLE)) {
             String message = "Incoming call from " + number;
@@ -53,6 +53,8 @@ public class CallReceiver extends BroadcastReceiver {
         else if (state.equals(OFFHOOK) && lastState.equals(IDLE)) {
             Toast.makeText(context, "Outgoing call to " + number, Toast.LENGTH_SHORT).show();
             Log.i(TAG, "Outgoing call to " + number);
+
+
         }
 
         // Hang up
