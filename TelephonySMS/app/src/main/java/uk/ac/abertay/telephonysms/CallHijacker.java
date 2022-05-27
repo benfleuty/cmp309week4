@@ -12,11 +12,7 @@ public class CallHijacker extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-
         String number = intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER);
-        Toast.makeText(context, "Outgoing: " + number, Toast.LENGTH_LONG).show();
-
-        Toast.makeText(context,String.valueOf( intent.getAction().equals("android.intent.action.NEW_OUTGOING_CALL")), Toast.LENGTH_SHORT).show();
         if (intent.getAction().equals("android.intent.action.NEW_OUTGOING_CALL")) {
             String oldNumber = intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER);
             Log.i("DEBUG", "To: " + oldNumber);
